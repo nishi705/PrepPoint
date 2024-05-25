@@ -1,0 +1,10 @@
+https://leetcode.com/problems/the-dining-philosophers/ 
+https://leetcode.com/problems/fizz-buzz-multithreaded/ 
+https://leetcode.com/problems/building-h2o/
+https://leetcode.com/problems/print-in-order/
+https://leetcode.com/problems/lru-cache/
+Implement LRU algorithm
+
+
+After Scaler class
+https://www.udemy.com/course/multithreading-and-parallel-computing-in-java/
