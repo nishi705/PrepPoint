@@ -1,0 +1,35 @@
+https://github.com/nishi705/Interviewbit_complete_solution/commit/9181354bc30d3d269852723c05c13151ae6fe0eb(coding questions)
+
+
+
+Case Study 3: Messaging:
+                   (Facebook messanger):
+here lets see in messasing what API will contain
+
+API: how the other client or other services use our system:
+
+Note: jwt token,Application server will get the jwt and then hit the auth then it will get the user id
+2.(offset,limit) is pagination: if want to see the rescent 10 messases then we can scroll up after that see
+  scroll down and see next 10 rescent messes and so on....basically one page connected with another page with same 
+   same content
+3.offset: way of traking the messases in sequential manner sending by kafka topic
+4.Offset and limit: means suppose in db u have lots of pages and u want 3rd page conversation with limit 20 messages
+  
+so particular page is offset here and limit is 20 conversation
+
+IDEMPOTENCE:it means how to deduplicate the things or messages so that same messages will not be send the multiple times. messages should not be duplicate.so that same uuid will not receive(if we send the same messge it will have the same uuid )and make sure we will not receive the same uuid
+
+uuid:(unique index for the uid) when we hit send button jason will generate and at that time onlu uuid will generate
+
+Note: while designinng the system the API (send message(sender_id,receiver_id,messages,uuid) should be idempoted
+fan out write: means very expensive write operation (lot of users means lot of write operation)
+
+
+sharding: sharding by user_id we can think in one to one to conversation but still we will have one problem (i.e consistency) in this case we will have to shard and may sender will fail or sometime receiver will fail.
+
+      in case of group sjarding by user_id is not good coz of super expensive write operation in multiple number of shard
+
+
+2. if nishi chated with multiple friends and u want to read all the messages which is related to nishi then one thing we can do is we can go one by one to each and every shard and can fetch which is super expensive.
+ another thing we can create one shard and can all those converastion which is related to nishi which will be sorted and sharded by userid, pagination,metadata everthing.
+

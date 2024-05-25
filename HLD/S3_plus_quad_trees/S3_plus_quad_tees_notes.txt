@@ -1,0 +1,37 @@
+wifi password:14440005(505)
+Agenda:
+
+-working with large files
+-Nearest neighbour queries(this is a data structure to use to design UBER)
+-Quad Trees
+
+/*
+1.CDN : it is server
+
+
+*/
+
+
+HDFS,S3 files how to store them, whats behind the scene. 
+so, whenever we have discussing about any system we set the following things
+large files,audio,video,test case file these files never stores onto database 
+they stores in large file system. Whenevere we have user uploaded content like
+imgaes,vedios,i/o files for particular problem test cases all those stores into the large system like S3(simple,store,service)/HDFC(hadoop distributed file system).
+Suppose we have to build a large system which can build a very large file.If suppose u have app server where u logging the data but not removing the data in that case.
+
+Whenever we store some kind of lagre file there has to be some constraint/requirnment.
+
+Requirement:
+-> storing the extremly large files (100TB)
+-> data might be critical so the data should be reliable and durable.
+-> Both read and write must be possible
+  read: download the files or stream the file on demand of files.
+        Another thing is that we should able to do analytics on top of the          files(atleast we should be able to run the complex query)
+ 
+so, if we have large file can we store the file inside the single large server? 
+No.
+
+so, how do we store the large filee?
+
+
+

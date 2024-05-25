@@ -1,0 +1,63 @@
+While approaching any design we have to do below things:
+:- Problem Statement
+:- MVP(minimal ,viable(still should be usable), product)
+:- Scale estimation(in this we see the storage requiremnet,number of queries 
+    per second,this will only tell us if we need sharding or not,we will see wether the system is ready or write heavy)
+:- Design goals(are we looking for availability/consistency),cinsistency is, realy important for us, can afford the data loss,latency requirments.
+:- API(how  is the external world using our system)
+:- System design
+
+notes:PACELC theorem says that in the case of partition you have a choice between avalibility or consistency else we have a choice between latency and consistency.
+Scale estimation and Design Goals we see Data intensive/compute intensive(chatgpt)
+
+1.Problem statement:
+
+
+Typeahead: suppose in the browser in the search bar if i typed "diw" only not as complete word or not a complete sentence although I will gets suggestions like "diwali celebration","diwali 2023","diwar movie".....etc.
+
+so although i did not did not typed complete I gets ahead suggestions which is called as "Typeahead".
+
+Q. How do you design a Typeahead system.
+
+2.MVP: mvp is how the end result is going to be seen.
+
+3.Scale Estimation:
+
+   a. Volume of queries : Suppose google gets 10 billion search queries per day
+
+scale of the data:- we decide by do we need sharding.
+                    for this we check what is the write/second
+
+Estimation of the data scale:
+
+number of hits can be a large, so for number of hits we are considering 8 bytes.
+and for search queries we are asuming 32 letters/search query, so every letteer will be 32 * 2bytes + 8 bytes <= 100bytes/row
+
+so if we want to store last 10 years data then it will be
+
+1.5*10^9 * 365 * 10 * 100 bytes = 10^15bytes= 1000TB of data
+
+so all 10 billion query will not be the same most of them will be duplicate. if "Holi" encountered 800M times then again if one more time it comes we just need to update count only.So we care basically we care about here number of unique search query because duplicate will be simplly update the count.
+
+So we will use sharding here because data is so much huge and also write queries are many.
+
+second thing:  here for every search query there are 7 typeahead query. We have already 10 billion search query so whenver we do any search its leads to write query because count will update every time whenever we do any search which 10^5 writes/sec and 10^6 reads/sec. So basically the system is read and write heavy.(1:30)
+
+Design goals:
+
+Availability vs Consistency: consistency is not that much important but availability is important.
+eg: suppose we typed  prefix Hol then two typeahead comes
+
+Do we need consistency at all(can we deal with data loss?):
+
+
+
+
+
+
+
+
+
+
+
+

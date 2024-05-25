@@ -1,0 +1,165 @@
+Master: source where all the writes happens
+Slave: replicate
+
+problem 1:consistent state tracking(means maintining the state in consistent manner)
+
+ a.if you make sure that read speed has been improved or data is alive
+ we use master slave architecture
+
+
+b.in master-slave all writes goes to master. so master slave is not possible in app server( means there is one master app server and there also lots of slaves app server) coz app server is stateless and master slave is possible for stated like database sever.
+
+c.there are app server and this app server wants to write in master then appserver must know about the master and if there are lots of app server then all app server must agree on same master. And this is the first problem we need to keep trck always.
+
+solution ca be, we can assign the one ip and we can tell to the app server that hey keep trak this ip but this is not possible because master is not static and if master fails then what we will do? in that caase any of the slave we will elect as a master. so we need to keep track always the master
+because master can change time to time.
+
+what will be the exact solution?any we can trck?
+
+
+1.naive approach:we can troduce one dedicated machine between the app server and databse master slave server which will keep track of master.
+
+but in that case two problem will arise
+
+1. extra hop will arise(means app server should keep asking about the who is master);
+
+2. single point of failure(means if dedicated machine dies then connection will be lost)
+
+now the solution for the second problem. we can introduce the cluster of dedicated machine.
+but again the problem will be every machine of clusterd dedicated machine will not have the updated master. in that case chaos will happen.
+
+thats why we intoduce zookeeper. 
+
+Zookeeper: 1.it stores configuration in distributed settings(configuration manager,it tracks the config data in a strongly consistant manager),so if zookeeper  stores any configuration other machine of the architecture should 
+agree on that.It exactly behaves like file system.
+2. Inside the zookeper we have a directories and files like a file system. and if we want to keep track of any data suppose (/config/aws_key/) aws_key we will store that into the zookeeper as a file and instead of calling file we call them node
+3.(file = node)
+4.inside the node we can store any kind of data like machine id, ip address etc and we can trck.
+5. Zookeeper is similiar as Cluster of machine in the cluster of the machine every machine is called as a node similary in zookeeeper every file is called as a node.
+
+Types of Node:
+1.Persistent:data will persistent until or unless externaly any one will not erase it. 
+
+2.Ephermal Node:Data will alive till the machine is alive means machine is writting some data to node of zookeeper at that time zookeeper will keep trak to machine is it alive or not. once the connectivity close data will be erase.
+ what kind od data we store into the ephermal node:
+ if we want to track the master then we can store like(/master), or any machine is alive or not.so insode the /master node of epermal node we write the ip of the master and if the connectivity goes down between the master and zookeeper node the ip address of the master inside the node(/mastre) set to the null.
+
+using the zookeper ephermal node we can keep track the master coz inside the zookeper we will have one ephermal node which will store the ip of the current master as along as the master will alive or master will connected with zookeeper.
+
+
+Master election: now let us see if the master goes down then how reelect the master.
+ once the master die sreelection happens.we have zookeeper one dedicated machine with /master ephermal node and in that node ip address of master will be store. when reelection started every slave wants updated their ip in master, but inside the zookeper there is a lock and only one slave is allowed to pass through. so only one slave is successed to write his ip into the /master. till this new mater will give its heart beat to /master the zookeeper's /master ephermal node will be alive and once it is fail to give its heart beat again the reelection will happen 
+
+
+now back to that two problem that how to prevent the single point of failure (i.e how to convert the zookeeper into the cluster of machine)
+
+2.how to solve the extra hop problem?
+
+to remove the extra hope zookeeper itself will send notification to app server and other salves also master too.
+for this slaves subscribes to zookeeper and whenever master will change or master will set to null zookeeper notifies to each and every slaves and afetr getting this notification every slave tries to writes its ip to the master they participate in reelection of master.
+In case of app server also app sever subscribe to the zookeeper for the notification in that way app server dont need to go again and again and ask about the master. zookeeper itself will tell everything to app server. after geeting the info about the master appserver directly contact to master and if master changes or master set to the null zookeeper notifies to the appserver in that case app server immeditly stop writing ti the master.
+In this way extra hop problem removed using subscription in 2 way connection.
+
+in case of zookeeper connection get lost from database server or app sever.
+then notification will not reach to the server so might possible sever will still think master did not change and they will write on same pervious master. so this is the big issue. 
+In that case connection should be two way. if zookeeper knows that connection between the sever and zookeeper get lost, serevres should also know connection get lost. then problem will be resolved.
+
+
+2. Single point of failure problem
+
+ Lets solve this using Zookeeper Architecture.
+
+Zookeeper Architecture:zookeeper architectiure is same as master slave but zookeeper we call it as leader and follower. whenever write happens by any slave or the server this write not only happens on leader it replicate in flower too. slave total number is always odd i.e. (2N+1) whene read started
+and more than 50% slaves having same write then read will successful.
+we are following the strong cosistency here so out of 6 follower if 4 follower included leader will have same data then read will successful
+
+why(2N+1)?
+if it is 2N then it will be difficult to decide weather successfull hapepen or failure happen if the successful read and failure read will be 50%-50% then it will dificult to decide.and zookeeper is CP.
+
+CP: consistency partition and AP: Avalibility partition
+
+when the leader of the zookeeper down then follower communicate with each other and relection of leader happen and app server and datanbase server still track that who the master is and still the reads of the ip of the leader happens only write onto the leader will be forbidden. request always done by the appserver or database server.
+
+
+Problem 2:
+
+Kafka:1.It internally uses Zookeeper and also its has master slave architecture becasue zookeeper internally uses master slave architecture. In the persistent queue data stored in disk and also it is replicated which also happens in master slave architecture and we can say kafka internally uses persistent queue or message broker.
+
+2.message broker/persistent queue internally divided into multiple Tpoics.
+suppose in producer side we have product producer service and message service in product service having asynchronus task (notify warehouse,invoice,email,analytics) and suppose msg service having asynchronus task is)email to vender,call if not responded,analystics(repition of the suplier))
+
+if product service producer sending some event to the kafka  this event will store inside the topic of the kfka messgage broker and kfka having its own internal storing mechanism. now on the consumer side we have warehouse consumer which will consume the particular topic event and also this particular event can be consume by the multiple consumer.
+
+3.produser can produce the event on different rate and consumer can consume the event at the different rates. also this event will persist till retention period after that it will be deleted. in this peroid any consumer can consume the event.
+
+
+
+Partition:Inside each toic there is a partition.if there are millions or billios of messages sending from the message service then it is difficult for each consumer to consume the messages from the topic thats why topic is partitioned.each consumer consumes message from each partition.inside the message service there are lots of app server and each app server will send the events to the particular patition and in consumer side each each consumer will consume the message from each partition.each topic will be related to particular event(message,email.invoice) etc.
+
+partion in a topic <= consumer for the topic.
+
+4.a. each event inside the partition is in round-robin fashion so that the particular event will consume by the particular consumer.
+ b.another way we can supply a key. suppose we are handling uber driver and producer continously pinging the location to the partion and the consumer will consume the particular drivers location. from the particular partition. for that we do (hash(key)% number of partition) so that the driver location event from the particular partition will consume by the particular consumer.
+
+
+Consumer group and why we need consumer Group?
+if the kafka toipc is very much huge and there is only 1 consumer then that consumer will consume the message forever time. so in that case we need consumer group. 
+suppose we have two consumer group and each group having multiple consumers and inside the tpoic havinf multiple partitions so consumer will tell to kfka that from which tpoic it want to consume message and to which group it belond then consumer internally directed by the kafka to the particular partition.
+
+kafka itself is bunch of machine each machine storing some data what happens if one machine dies and each machine known as broker means kafka is bunch of broker. if the one machine dies how to prevent the data loss?
+Always there is one answer and that is Replication.
+
+we have number of broker and inside the broker number of topics also inside the topic we will have number of partition so broker1 will have some topic and the partition and the same topic and prtition replicated to another broker2 and broker3 so if the broker1 goes down consumer can consume message from brojer2 or broker3. appserver never knows that which partition it will consume mesage so app server can connect to any of the partion and kafka will internally redirect to the correct partition.
+
+
+
+
+
+
+
+
+
+
+
+
+consumer should subscribe to relevent topic
+own internal storing mechanism
+data can be consume by the multiple consumer
+proqure the more items, update the counts
+
+
+
+
+
+ 
+
+
+ 
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+doubt: hi one doubt pragy can we read ops by Btree and write ops by lsm tree is that possible?
+2.state and stateless architecture(when there is a state then only replication is in sense)
+
+
+
+
+
+
+
+
+
+
+

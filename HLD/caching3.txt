@@ -1,0 +1,11 @@
+write around cache is more better than the  the TTL. in TTL one query takes 5 second.
+
+better solution is to use Global cache.
+In the global cache we will have multiple app servers and one global cache and one data base so any query comes to the app server, app server coonect with the global cache and there is a crone job between global cache and database and ttl is 1 minute, in every one minute data updates from database to global cache.
+
+
+1:40
+dry(do not repeat yourself)
+1:43
+constructor chaining
+

@@ -1,0 +1,196 @@
+Agenda:
+full text search:
+Elastic search:(lusence based)
+sharding:
+
+Document:
+document could be anything it can be product id,reviews id,log id,post/tweet id etc
+any item in our entire entity/design system need full text search is document
+
+zookeeper used to check that machine is alive or not? so in case of load balancer we already have the hot copy of the load balancer if the load balancer dies zookeper changes the hot copy to the load balancer.
+
+
+1.Based on the document shard is predectible but based on the words sidze of 2.the shard is not predectable
+
+2.elastic search or full text search is by default shard by the document id
+
+3.note:the actual document will be stored somewhere else?
+
+4.elastic search is not good in case flexible number of shard.if we will increase the number of shard then we will lost the elastic search index.
+
+Replication:master slave replication:
+
+
+
+Apache Lucene/Elastic search/Solr:
+
+1.Remove the 'Stop words'
+  after remving useless words('stop word'), special character we dont lost the information but we save the lots of spaces.
+
+(note: we are having pipeline with document 1 with indexes and document2 with indexes so on...) 
+
+2. After removing stop words we will have Stemming/Lemmmatization:
+ 
+roort and derived word(extension)
+steamming is fast but not robust and rule based with if else ladder
+Lemitization we see the entire pipeline and after see the menaing of the that word then only they does Stemming
+
+3.Other cleaning:
+
+
+
+Building the indexes is not a one time job, if it is then the life would be simple. Building indexes is continous job where we add reviews we can delete the reviews and so on. 
+
+search query:we need query and the dictionary both to get the data
+
+how do u go ahead and match this query
+
+3.Positional information
+all these will be in service layer
+
+(question: how to store the search query in the backend)
+
+
+
+Consistency in CAP is totaly different from the consistency in ACID,so if anyone ask wheather you will choose consistency or availibility,so always there should be a question what does mean of imidiatly consist and what is evantually consistant?
+
+so in full text search if we have immidate consistency then how the system would look like? and if eventual consistency then how system would look like?
+
+Immidiate consistency: if there is immidiate consistency then therev will be a couple of conditions
+1. no documents contains the query is left out. means the document can match any of the query then it must return it should not be the case that it not return any of the query.
+2.if the document is updated then immidiatly refletced the search result means it should not be the case that though the document is updated still
+search result is not updated. 
+
+Eventual consistency: it means document can upadted, can get added, can get removed etc.but search index might not reflect the lear time status of the document means search result is eventually sink up, might lag
+
+so we consider the eventual consitent even if couple of the reviews get missed that does not mean the end of the word, but yes we try to prevent the data loss but sill if couple of reviews missed we dont care that much 
+
+now we know the eventual consistency so lets think about the sharding here
+
+Note:so here we are not supporting the prefix query so we cannot shard by the prefix letter of the word
+
+There is two thoughts here
+1. shard by document_id: Any item that is in entire design or entity system is, any item that needs full text search is the documet.Any system like Apache Lucene/Elastic search/Solr is shards by document id.
+
+suppose we have multiple shard with different2 document so in this case if we does  insert/update/delete the document then how the document will behave?
+
+ans: we will have a doc id then go to the particular shard find the matching words and remove those words and reindex the doc content.
+
+what about the search query?
+
+suppose we have a word "women with dress", to find this sentense shall we go diff2 shard? no
+we will go to all the shard and every shard we will perform this query and every shard will give us the list of documents that match this query  and then we will collect all the resultant documents which matches the query.Every shard having inverted index and inverted index of all these shard will build on all the documents which is related to that shard. Internaly it does the elastic search.
+
+Latency: Every shard is processing the query independently so the latency will not really increase.
+
+Map-reduce: 
+lets see first function programming: in this there is no concept of for loops so if we want to do any operation on the collections of an item then it has to be in the form of function.
+suppose we have list of item and we are using the for loop then in that case we load all the items in the memory in one go. so it is difficult in the distributive computing therefor we go for the map and reduce where in map we load single item and in reduce we load two items which much easy.
+
+lets take an exapmle we have to collect all the result or we can say we have to do search query then what will happen.
+
+first we will have search query, this search query will go to the elastic search(elastic search as load balancer, point of contact). Apart form all these elastic search will have its own architecture. inside the architecture there will be number of shards and query will go to these shards and in the map function we will take.
+
+reduce: in the reduce function 
+      reduce(item,accumulation,function);
+ lets suppose we want to add two number then we can write like below
+      reduce(number,0,(a+b)->a+b) so here (a+b) is the reducerand job ofthe reducer is totake all the data
+so basically query send to all to these shards, every shards will return some data, so here reducer work is to take the data pair wise and combine them
+and finally we will get the data.And this is calledthe reduce operation.
+
+In this case reducefunction will be like 
+   reduce(shards,[],(a,b)->[....a,...b])
+           .....,list of data,some list from a and some list from b, and we will return a list of all the items from a and items from b.
+
+so, here basically whats going on suppose given a two list of item a and b returns a new list of item from both a and b.
+in case of document can we concatinate both of them and intersect them?
+since every shards having different different sets of data so concatination/union is fine. Also union tries to remove the
+duplicate and intersection tries to add the duplicates,so intersection not needed.
+
+so,in this particula senario when we sharded by the document id which is actually a prefered solution which 
+does the elastic search behind the scene in this case we will have bunch of shard every shard will have its own inverted index based on documents,
+isert/delete/update is simple we will tale doc id, go to the particular shard and reindex the doc content.
+
+but searching is complex, for the seaching we will have to go all the shards and apply the map-reduce function,
+for this map all the query to different shard and will give the set of the document and will give out the result.
+
+so what we are doing here?
+we are doing full text or elatic search here.elastic search is the open source solution
+that provides the funtionality outof the box. elastic search provides the full text search
+like kafka is a messaging queue amd nginx is a load balancer.
+
+
+cons:
+
+pros:1.
+2.
+3.we can skip unresponsive/slow shard: if we do shard by documet_id then we return bunch of result, if any shard dont return
+   the result at the particular time then it is not that much painfull.still with the
+  help of rest shars result we can get the interesting result.
+
+2. shard by the word:
+ we have different shard and suppose they are sharded by the different2 words like class, system,design or anything else, but yes one shard can have multiple words.
+
+for the insert/update/delete: unlike of shard by doc_id here for updating,deleteing,inserting we go for the every shard.
+
+searching: in this also we go for every shard to implement the query.And if we have 3 word in one sentence the on an average total 3 will we have to go for the query.
+
+so, lets see what we will do once we will get the data from the shard?
+
+
+(inside the shard we contain the document id and position of the document)
+in previous case we know the average size of the shard but in this second case for every word we will have one shard and from the every shard we will get list of documents. from the each shard suppose we have one shard based on word women and from that shard we have numbers of documents from all the documents if we have 5% document which contains the word women. so the size of the shard is unpredictable. it can be very large.
+from the evry shard we got required list of documents which contains the particular word which we want.No we will take intersection/union, so suppose if we have billions of document as a result we can do a intersection of them then the result will be very small. for whatever the query whether it is large or small we do very complex operation. first we get large set of result data then we combine and intersect them which is very complex operation.
+
+so, the thing is here is whether every shard taking less time or more time we need to wait for each and every shard result otherwise we will not get the correct result. suppose we have word women,white,dress with different shards and suppose dress shard taking so much time still we need to wait otherwise in place of dress we can get shoes,shirt etc which is wrong result.
+
+Zipf's low: ith most used word will occur approximtly 1/i th time
+
+Final part:
+
+we have done sharind and now we need to ensure in case of failure data should not lost it should robust.
+
+so, by adding redundency(replicas) we can ignore the data loss in case of failure.in this case latency will be high so whatever shard is slow that will detemine the latency.All the shards are equally loaded but if in any case any shard is overloaded that shard will have small response time
+
+Replication: elastic search is replicated, elastic does not let u have flexible number of shards either. in stating u specify the number of shards and number of replication, so we want to change the number of shards then we can not do otherwise entire elastic serach will destroy, search index will destroy. 
+
+master of the replica are never stored in a same machine. if the same machine has multiple replicas of one shard in that case if machine goes dows we lost two shards. we need to ensure that one machine only has one copy of any shard
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+

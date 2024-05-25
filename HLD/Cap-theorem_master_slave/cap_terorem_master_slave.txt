@@ -1,0 +1,175 @@
+I have a client and client reaches out to the DNS because the client just has  the domain name but to reach to any resource from the internet I need IP address . So I go to the DNS give the domain name and fetch the IP address
+Using this IP address I can reach out to the system. The box that interact with the eoutside world is usually called as a gateway and gateway having more responsibility other that load balancer. Gataway is the first point of contact which interacts with the outside system to the inside system.
+
+suppose we have bunch of appserver (appserver is place where all the computation, business logic and actual work happens). Gateway interacts with the ouside world and forward the request to the bunch of resources bcause a single app server box may not handle all the load.
+(example of Auto scaling in AWS)
+Now beyond this we have databases where data gets stored(and this is a ultimate source of truth)
+
+Sharding: There might be a lot of data that one single machine can not handle suppose use database of FB and we want 3 billion user data(and it will have user_id,name,gender,relation_status...,user friend table,.. and all) and suppose I have these two table usr_table and user_friends_table and in bothe table we have millions and millions data which one single cant handle.
+So to overcome this problem there is a two concept Sharding and Replication
+
+Sharding is a idea to distributing this data into multiple machine vecause one single machine cannot handle all the data.One single machine cannot store all universe of data .
+I will distribute my data universe into mutually exclusive and together exhautive way so that all the shards together have all the data and no two shards have the same data. sharding means patitioning the data.
+For now imagine user_id is the sharding key which helps to determine which sharding box this user to be in and corresponding friends as well.
+
+Replication:
+Suppose we have one machine and in that machine there is one celebrity post and everbody wants to see the post so there is a lot hight of read request
+so we cannot handle beyond threshold write and read request parallaly.So there is limit to handle the request
+
+So at this place idea of replication come.
+The replicaion is: A single copy of the data is getting overwhilmed because of the hight request of the data hence you create the multiple copy of the data so that people can read from the dofferent copy of the data.
+So there will be bunch of replicas where we replicate  the data so that some people can read from box, some can other box,some can other.
+So the copies of the data is called as replication
+
+so sharding is distributing the data and replication is copining the data
+
+Shading and replication can exist together:
+
+suppose we have multiple shards and different shard withe different userId.
+although shard1 having one userId data but still read request can be high for that userId and hence we create multiple replicas for shard1. similarly for shard2 and shard3......so on.
+
+Cap Theorem:
+In distributed system you can only choose two out three of these properties.
+Properies are:
+1.Consistency
+2.Availability
+3.partition tolenece
+
+Distributed system are bunch of the system together done the work(computatio, storage, etc..)
+
+lets take an exaple:
+
+suppose the person hardeep created one startup that is event reminder service and hardeep having one phone number 99991111 using that number everyone calls hardeep and tells to him hay hardeep this date there is this event please register. Hardeep register that again next time user calls hardeep and ask hey hardeep please let me know the event date which i have to attend hardeep tells him so this is the service. On going forward this startup run and because of lots of request for read &  write hardeep by himself wah not able to handle those request and thats why he hired another person sawan to maintain the read operation. 
+
+scenarion2: now next scenario is one person come to hardeep and asked him 
+             to register his particular event for particular day hardeep did. now next time user come to ask about his event date then load balance redirected the request to sawan and when user asked about his event, sawan did not get the registered event date. so what happened actually there were no consistency between two machine.We have here a distributed system.
+
+So the formal definition for the consistency is:
+Every write should have return the latest write or in other word we can say every machine have the same latest view of the truth.
+
+So in above example we see that the present machine is not consistent
+so how we can consistent the machine.
+
+Using the updated protocol. so when client ask for write request for his event the load balancer redirected the request to hardeep and and registered the event on his system and also make sure untill or unless the write thing not hapeened successfully inside the sawan's system as well and sawan did not send the acknowledement to hardeep, Hardeep dont send the reply to client. Once hardeep gets write acknowledement from sawan he reply back to client. 
+So second time when client come for his read request and load balancer redirected his read request to sawan system sawan able to give the ans for his request now here both the system are consistent.and now we can say both the system are replica to each other
+
+Scenarion 3.Now suppose sawan went on day off and enery request is comping 
+          to hardeeps system only but accodring the updated protocol since sawan is not doing any operation and not acknoleding anything so the write operation will not happen in Hardeep's system as well so as a system you are unavailable.
+
+Avalability: Cap theorm A is you are available to register.In other words  
+            whenever u queried you should be able to respond back without any error.You might can give incorrect answer but system should available to give answer.
+lets take an example in the hotstar you are wtaching live cricket math and can see the view count. But all the time hotstar dont show the accurate view count it might be different.but accuracy does not natter here then what matters?  Availability hotstar is always available to show the view count it might be correct might not.but hotstar is always available to show you view count.
+
+Scenario 4.Now solve this availability problem as well.
+
+Lets update the protocol: so we have hardeep's system, sawan's system and and also a load balancer so whenever sawan is absent hardeep attend the call and register all the client's query. once sawan  will come back hardeep will sync up with sawan and tell him to register/note down all the pending query.
+Now here we can see system is both consistent and avaialble as well.
+
+Scenario 5. Now Caps theorem third point came into the picture 
+
+PARTITION: Netwok partition
+Partition Tolrence: Means we allow the patition we can tolerate partition
+
+two machine always connect over a network.Network partition means system cannot talk with each other because the network between two machine broken temporarly.
+
+Scenario: lets check the problem in above system we made system consistent and available as well but still if at the time of sync when sawan comes back to his work and hardeep try to connect with him to tell him to register all the pending queries, at that time only if the network partition happened and connection lost then again the system will be inconsistent ryt?
+
+So in the real world cap theorem tells that I will be only able to choose only two out of these three options
+
+So it is not possible to craete a system which will tolerate the partition so these below combition only possible
+1.consistent + partition
+2.Availability + partition
+
+So in the distributed system patition tolerence always required because network is always reliable
+
+so in the above system whats happening.
+option A: when both the system was present and both system were not connected with each other and there we no Note sharing were happening at that time system was not consistent but system was available and partition tolerent
+
+i.e(Available + Partition tolerent)
+
+Option B: when the note was happening and write will only be acknowledge when both copy have it.
+
+i.e (Consistent + Partition tolerent)
+
+Option C: you write it at both the places but when one machine is down you only write at the remaining machine and before down machine comes back you sync...
+Till this time system is available and and partition tolenece
+
+but at the time of syncing if the patition happens system will no longer consistent
+
+so here i.e( A + P)
+
+So when more than one system is present then system can be (C + P) or (A + P)
+
+PACELC THEOREM:
+
+PAC is same as CAP and rest ELC is
+
+here E stands Else from ELC 
+and L is latency and C stands for consistency. So when the partitioning not happening then we choose between latency and consistency.
+So now lets come to that example where hardeep and sawan were had system and hardeep's end writing was happening.but It is possible as well that writing can happen from sawan's end as well so the write thing was mainting from sawan's end as well.So If you want higher consistency then it will introduce the latency and on the other hand if you want low latency the you have to compromise with consistency.
+
+(Latency: latency means times thakes to complete your request.)
+Low latency = Fast
+High latency = Slow
+
+
+
+Master slave replication: 
+
+
+Master is the ultimate source of truth and slaves are bunch of machines
+so all the writes will happen in the master and slaves are where all the read happens so this is called as read slave as well.so we have replicas of our master at multiple places so that read can happen from the different machines.
+Reads are always much much higher than the writes.So there will be lots of read replicas and reads will be distribute there.
+
+First approach:
+                         
+Lets imagine one system where we have one master where write will happen and bunch of replicas where read happens.one user come ask to register the 
+name once master done his registration it acknwledges ti user and in offline all the copies of registered name will be pasted in all other replicas.So this is low latency because system is letting user to wtire his name in all the boxes.
+But there will be low consistency because inbetween of all if any other person wants to read any thing might that will be not present in any replica.(this low consistency scenario here can be called as a eventual consistency because might that will be present but right now it is not present and thats why we call it as a eventual consistency.
+
+
+Second approah:
+
+Lets imagine the same system where there will be one master and bunch of slaves but here what happens, user comes he tells to write his data and after that users data will be copied into  all the replicas after coping data into replicas, all the replicas will send the acknowledges to master and then only master send the acknowledges to user that his data is registered.this system is high consistency or imidiate consistency but unfortunatly this high latency because this system takes lots of time acknowledge user that his data registered.
+
+
+So here we can say consistency and latency are in a way competing to each other.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
