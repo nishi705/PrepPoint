@@ -1,0 +1,28 @@
+Interactice: that will be played but not saved in database
+MVC:only use MVC architecture but not
+MVC+model attr(@Entity,@Id,@MAppedSuperClass,@ONEToOne etc.)
+Dependency Injection Atrribute(@Service,@Repository,@Controller,@Autowired)
+(puspose of this DI attribute is that we dont do DI by owerselves but by the springboot  itself.
+RepoAttribute and lombok attribute
+
+
+
+Splitwise:
+MVC+model attr
+DI atrr
+Repository attr.
+restful api attr.
+One flow end to end
+
+1.Requirement gathering
+2.coding
+3.Discussion
+
+
+Overview:
+ In the splitwise
+it is expense sharing app->user register-> they form group -> inside this they add expenses-> inside the expenses there is who paid this expense -> what is everyones share
+
+
+
+

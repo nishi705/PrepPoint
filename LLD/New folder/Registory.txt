@@ -1,0 +1,17 @@
+prototype design pattern:(prototype means copy or sample or model)
+int notebook most of similar property but some are diff
+like funfacts and cover design are unique for every notebook
+
+Need of prototype and regisrty: definitation is given in notes:
+
+problem for V2: 1.private data member(means no getter and setters given)
+   
+    2.client SRP violated: here what student class should do instead of that
+   Client class is doing.
+    3. OCP violation: if multiple classes inheriting the same student class then according the condition using if else condition we can creeate the instace of subclass so we have to use more number of if else condition which violates the OCP. if new type of student is added then client will be changed 
+coz we need to add more if else so OCP will be violated
+
+copy contructor will not solve the OCP violation
+
+
+reister: where the samples or the prototypes are stored

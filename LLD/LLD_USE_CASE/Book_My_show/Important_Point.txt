@@ -1,0 +1,3 @@
+JPA:it is actually a manahgement of relatinal data in the java application
+Hibernate:hibernate are ORM(Object relational mapping tool)
+it is used to store the java object into database

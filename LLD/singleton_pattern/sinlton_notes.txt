@@ -1,0 +1,61 @@
+Introduction to design pattern:
+
+Singlton design pattern(repetitive) and design principle:
+sloid principles are guidelines 
+and design patterns are 23 identified problems 
+has been written using the SOLID priciple only also design patterns are well stablish solutions in OOD.
+
+Singlton design pattern:
+design a class which will allow only object to be created i.e is Singlton
+
+here division of the Category of design pattern h=is depending upon the life cycle of the object
+
+1.Creational Design pattern:It is basically depends on three things
+  a.how an object can be creared
+  b. how many objecys can be created
+  c.in which class object to be created.
+
+2.how one class contains an object of another clas(creation of class)
+in structural only we would do aggrregation and composition both.
+
+39:00
+
+3.behavioural 
+
+
+
+Creational
+Singlton design pattern:whenever we share the costly resources like db connection which internally uses the tcp connection with 3way hand shaking in that case we use the create singlton object. 
+
+Implement singlton:
+
+version 1:
+ in the sinlton references can be anything and the references belongs to the stack but the instance should be one only and the figure you can refer to notes. because of the buplic constructore we are creating the multiple objects and that is the version 1 problem
+
+
+version 2:Lets try to remove the constructor
+
+version 3:
+
+version 4: after applying the static still in main class when we call it two times two new instance created because how much time we call the  method that many time it will get inside the method and crates the new method. so again the same version 1 problem lets see how we solve this
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

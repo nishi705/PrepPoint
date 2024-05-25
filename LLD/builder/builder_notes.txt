@@ -1,0 +1,115 @@
+Builder design pattern:
+
+V0: given lots of parameter inside the class
+
+V1: 
+problem:
+
+inside the client class whatever we want we can set so there is no           validation here.
+
+second is if there are 4 important properties and client update only 3 properties then created object will be incomplete.
+
+V2:in version 3 we can create parameterised constructor and can pass the neccessary properties to it.
+ problem: 
+problem in 3 version is unreadable because if in the clients code if we pass the parameter, only by seeing those parameters we cannot say what those parameter are so that is unreadable
+
+and difficult to maintan the sequence of the parameter also. because we dont know the order of passinf parameter.
+
+Also if the add one more parameter then the constructor will change then compile time error.
+
+another 4th problem is if there is suppose batch is not neeccessary property so for that in the client code we pass null to them.
+
+v3.to solve the above problem we can create diff2 constructor with different2 parameter for the we use the same parameter in constructor because of that dry(do not repeat yourself) problem arises to overcome this issue we so constructor chaining( see the notes we can give the default value) 
+
+problem:but if we creates lots of contructor then tehn constructor explosion happens.2^n constructor can be created.
+
+also constructor overloading might not always possible(see the notes)
+
+v4.now what we can do, we can pass the one parameter using hashmap,create private parameter,private getters and 
+hashmap<String,Object>
+
+problem: typo problem can be see the notes
+         we need to do lots of if else and typecaste object into related data type coz map storing the value in object manner.
+
+
+V5. to overcome from all these isues lets create one Builder class and this builder class will help us to create the student
+
+Builder is nothing but it collects all the properties and pass to the student class.
+
+problem:problem here is that there should be a way to tell the client that he required a builder to create a student.coz here in the stuent object we are passing the builder object
+
+
+V6.here to resolve the issue we try to create the one static fuction inside the student class and there is one question why this fuction should static.
+the real answer is builder is required to creating an object and we have to call this funcion inside the class client before creating the student object.
+
+problem: 
+ here another problem is that according to the srp Student student should not create the student object by itself but builder should do this, so how we will do this?
+Build.build() here builder will construct the student and give it to the student
+
+
+
+Object chaning:
+
+ Student st2 = Student.getBuilder()
+                        .setName("Sumeet")
+                        .setAge(35)
+                        .setGradYear(2009)
+                        .setUnivName("PEC")
+                        .build();//here build is using to get the student object
+
+
+Inside the Builder class we have setter method and that method looks like below
+  public Builder setName(String name){
+            this.name = name;
+            return this;// here returning the builder object with name 
+        }
+public Builder setAge(int age){
+            this.age = age;
+            return this;//here returning the builder object having name and age both.
+        }
+
+inside the  Builder class we have this also
+ Student build(){
+            return new Student(this);
+        }
+
+after setting everything inside the Builder class we call client class at the end .build() method which go to the Builder class and  return the Student object.
+
+
+here whats haappening Student.getBuilder() giving us new builder object after that setName method seeting the name into the buildeer object and the 
+return back the builder object again, now in builder object we have have name, now call setAge() method and set 35, inside theBuilder class setAget method doing this.age = age here 'this' is an builder object which is returned previously with name "sumit" and this.name = name means now we have object with name and age both......so on.
+
+
+
+here there is one point 
+
+below one should allow only to create the object.
+Student st2 = Student.getBuilder()..... 
+means 
+Student st = new Student()
+above we need to stop to use for that we need to make the Student constructor private. and take the Builder class inside the Student class.
+
+
+
+
+
+
+
+
+Note:
+Only use of Builder class is to helps to collet all the properties and pass them it to Student to create Students,
+It will have all the properties, and we pass the Builder in the student class inside the Student(Builder b)constructor.
+
+Perviously what we were doing we were passing either lots of paramer, or HAshmap<>, but now we are passing Builder.
+
+so inside the constructor we were doing validation and doing 
+age = b.age.....etc.
+
+so age,name,gradyear we will set in the client class and then we will pass
+
+So using the
+-> Biulder we are avoiding now to create the many constructore, and also avoiding to pass the many parameter into it.Constructor explosion handeled
+->Validation are also taken care inside the Student class.
+
+
+

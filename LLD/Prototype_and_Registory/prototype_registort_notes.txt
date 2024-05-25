@@ -1,0 +1,23 @@
+Prototype and registory design pattern
+
+we need to copy of this object
+in the object some properties are same and some are different so we can 
+way1 : we can create seperate object and set all the properties.
+
+way2: create prototype(sample/model)and store into registory after demand, get the property from the registory and clone it after that make the changes(set the unique properties)
+
+problem:in this we only chages the references but not creating the new object so if we change new reference the original object will also change.
+
+
+v2:in this  we can create new object and we can set the changing parameter
+problem: private data member we cannot access
+        2.copy the object and setting its property should idealy in side the Student class but here client is doing this so srp being violated.
+3.OCP violation inside the client calss depending upon the class object(meritstudent,student,financialstudent) using if else we create instance 
+
+V3. we can use copy constructor, 
+problem: OCP is not solved because of inheritence as we see in V2. if we create the function and try to pass the object to it but still that object can be depent on(meritstudent,student,financialstudent). so ocp is still there.
+
+V4.Clone() method and copy constructor within the clone() methdod
+clone() would call the copy contructor but only copy contructor we cannot use use because of OCP violation
+
+

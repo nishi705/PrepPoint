@@ -1,0 +1,18 @@
+Factory design patterns:and all three below are the creational design pattern.
+Factory method: inheritence
+Abstract factory: composition
+Composite pattern: Aggregation
+simple factory: practical factory(though its violates the OCP principle still we use this only)
+
+Structoral design patterns  are like Composite(which helps to create a tree)
+
+Factory method(Inheritance):
+
+
+
+
+I work as a backend developer and follow agile methodoloy
+
+1.Hashmap,HashSet,LinkedList.........
+2.How Internally HAshmap works?
+3.java 8

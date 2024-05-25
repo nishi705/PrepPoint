@@ -1,0 +1,4 @@
+Dispathcher servlet:
+Spring MVC and dispatcher servlet
+
+config.class: inside this class every bean will be created
